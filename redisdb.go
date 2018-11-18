@@ -239,11 +239,13 @@ func cleanupHook() {
 	}()
 }
 
+//noinspection GoUnusedExportedFunction
 func SetupDatabase(redisURL string) {
 	gRedisPool = newPool(redisURL)
 	cleanupHook()
 }
 
+//noinspection GoUnusedExportedFunction
 func GetDatabase() RedisDatabase {
 	return RedisDatabase{redisPool: gRedisPool}
 }
