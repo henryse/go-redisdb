@@ -38,7 +38,7 @@ type RedisDatabase struct {
 	redisPool *redis.Pool
 }
 
-func (d *RedisDatabase) ping() error {
+func (d *RedisDatabase) Ping() error {
 
 	conn := d.redisPool.Get()
 	defer conn.Close()
@@ -50,7 +50,7 @@ func (d *RedisDatabase) ping() error {
 	return nil
 }
 
-func (d *RedisDatabase) get(key string) ([]byte, error) {
+func (d *RedisDatabase) Get(key string) ([]byte, error) {
 
 	conn := d.redisPool.Get()
 	defer conn.Close()
@@ -63,7 +63,7 @@ func (d *RedisDatabase) get(key string) ([]byte, error) {
 	return data, err
 }
 
-func (d *RedisDatabase) set(key string, value []byte) error {
+func (d *RedisDatabase) Set(key string, value []byte) error {
 
 	conn := d.redisPool.Get()
 	defer conn.Close()
@@ -79,7 +79,7 @@ func (d *RedisDatabase) set(key string, value []byte) error {
 	return err
 }
 
-func (d *RedisDatabase) exists(key string) (bool, error) {
+func (d *RedisDatabase) Exists(key string) (bool, error) {
 
 	conn := d.redisPool.Get()
 	defer conn.Close()
@@ -91,7 +91,7 @@ func (d *RedisDatabase) exists(key string) (bool, error) {
 	return ok, err
 }
 
-func (d *RedisDatabase) delete(key string) error {
+func (d *RedisDatabase) Delete(key string) error {
 
 	conn := d.redisPool.Get()
 	defer conn.Close()
@@ -100,7 +100,7 @@ func (d *RedisDatabase) delete(key string) error {
 	return err
 }
 
-func (d *RedisDatabase) getKeys(pattern string) ([]string, error) {
+func (d *RedisDatabase) GetKeys(pattern string) ([]string, error) {
 
 	conn := d.redisPool.Get()
 	defer conn.Close()
@@ -129,7 +129,7 @@ func (d *RedisDatabase) getKeys(pattern string) ([]string, error) {
 // supplied slice of field names (keys). This splices those two slices into a map. It passes
 // through an error value, similar to redigo’s convenience conversion functions, so it can be used
 // with a minimum of ceremony.
-func (d *RedisDatabase)spliceMap(keys []string, values []string, err error) (map[string]string, error) {
+func (d *RedisDatabase) spliceMap(keys []string, values []string, err error) (map[string]string, error) {
 	if keys == nil || values == nil {
 		if err == nil {
 			return nil, fmt.Errorf("redis: cannot splice keys supplied to HMGET with values returned because one or both slices are nil")
@@ -154,7 +154,7 @@ func (d *RedisDatabase)spliceMap(keys []string, values []string, err error) (map
 	return result, err
 }
 
-func (d *RedisDatabase) hmGet(key string, fields ...string) (map[string]string, error) {
+func (d *RedisDatabase) HMGet(key string, fields ...string) (map[string]string, error) {
 	if len(fields) == 0 {
 		return nil, fmt.Errorf("redis: at least once field is required")
 	}
@@ -166,7 +166,7 @@ func (d *RedisDatabase) hmGet(key string, fields ...string) (map[string]string, 
 	return d.spliceMap(fields, values, err)
 }
 
-func (d *RedisDatabase) hmGetKeys(key string) []string {
+func (d *RedisDatabase) HMGetKeys(key string) []string {
 	conn := d.redisPool.Get()
 	defer conn.Close()
 
@@ -174,7 +174,7 @@ func (d *RedisDatabase) hmGetKeys(key string) []string {
 	return values
 }
 
-func (d *RedisDatabase) hmGetAll(key string) map[string]string {
+func (d *RedisDatabase) HMGetAll(key string) map[string]string {
 	conn := d.redisPool.Get()
 	defer conn.Close()
 
@@ -182,7 +182,7 @@ func (d *RedisDatabase) hmGetAll(key string) map[string]string {
 	return values
 }
 
-func (d *RedisDatabase) hmSet(key string, hashKey string, value []byte) error {
+func (d *RedisDatabase) HMSet(key string, hashKey string, value []byte) error {
 	conn := d.redisPool.Get()
 	defer conn.Close()
 
@@ -197,7 +197,7 @@ func (d *RedisDatabase) hmSet(key string, hashKey string, value []byte) error {
 	return err
 }
 
-func (d *RedisDatabase) incr(counterKey string) (int, error) {
+func (d *RedisDatabase) Incr(counterKey string) (int, error) {
 
 	conn := d.redisPool.Get()
 	defer conn.Close()
@@ -205,7 +205,7 @@ func (d *RedisDatabase) incr(counterKey string) (int, error) {
 	return redis.Int(conn.Do("INCR", counterKey))
 }
 
-var(
+var (
 	gRedisPool *redis.Pool
 )
 
@@ -239,7 +239,7 @@ func cleanupHook() {
 	}()
 }
 
-func SetupDatabase (redisURL string) {
+func SetupDatabase(redisURL string) {
 	gRedisPool = newPool(redisURL)
 	cleanupHook()
 }
