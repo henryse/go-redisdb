@@ -197,6 +197,17 @@ func (d *RedisDatabase) HMSet(key string, hashKey string, value []byte) error {
 	return err
 }
 
+func (d *RedisDatabase) HExists(key string, hashKey string) (bool, error) {
+	conn := d.redisPool.Get()
+	defer conn.Close()
+
+	ok, err := redis.Bool(conn.Do("HEXISTS", key, hashKey))
+	if err != nil {
+		return ok, fmt.Errorf("error checking if key %s, %s  exists: %v", key, hashKey, err)
+	}
+	return ok, err
+}
+
 func (d *RedisDatabase) Incr(counterKey string) (int, error) {
 
 	conn := d.redisPool.Get()
