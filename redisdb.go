@@ -238,14 +238,14 @@ func newPool(redisURL string) *redis.Pool {
 	}
 }
 
-func cleanupHook() {
+func cleanupHook(pool *redis.Pool) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	signal.Notify(c, syscall.SIGTERM)
 	signal.Notify(c, syscall.SIGKILL)
 	go func() {
 		<-c
-		gRedisPool.Close()
+		_ = pool.Close()
 		os.Exit(0)
 	}()
 }
@@ -253,10 +253,17 @@ func cleanupHook() {
 //noinspection GoUnusedExportedFunction
 func SetupDatabase(redisURL string) {
 	gRedisPool = newPool(redisURL)
-	cleanupHook()
+	cleanupHook(gRedisPool)
 }
 
 //noinspection GoUnusedExportedFunction
 func GetDatabase() RedisDatabase {
 	return RedisDatabase{redisPool: gRedisPool}
+}
+
+//noinspection GoUnusedExportedFunction
+func NewDatabase(redisURL string) *redis.Pool {
+	pool := newPool(redisURL)
+	cleanupHook(pool)
+	return pool
 }
