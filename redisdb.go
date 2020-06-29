@@ -208,6 +208,17 @@ func (d *RedisDatabase) HExists(key string, hashKey string) (bool, error) {
 	return ok, err
 }
 
+func (d *RedisDatabase) HDelete(key string, hashKey string) (int, error) {
+	conn := d.redisPool.Get()
+	defer conn.Close()
+
+	number, err := redis.Int(conn.Do("HDEL", key, hashKey))
+	if err != nil {
+		return number, fmt.Errorf("error checking if key %s, %s  exists: %v", key, hashKey, err)
+	}
+	return number, err
+}
+
 func (d *RedisDatabase) Incr(counterKey string) (int, error) {
 
 	conn := d.redisPool.Get()
