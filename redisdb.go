@@ -267,3 +267,8 @@ func NewDatabase(redisURL string) *redis.Pool {
 	cleanupHook(pool)
 	return pool
 }
+
+//noinspection GoUnusedExportedFunction
+func GetRedisDB(pool *redis.Pool) RedisDatabase {
+	return RedisDatabase{redisPool: pool}
+}
