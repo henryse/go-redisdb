@@ -227,10 +227,6 @@ func (d *RedisDatabase) Incr(counterKey string) (int, error) {
 	return redis.Int(conn.Do("INCR", counterKey))
 }
 
-var (
-	gRedisPool *redis.Pool
-)
-
 func newPool(redisURL string) *redis.Pool {
 	return &redis.Pool{
 		// Maximum number of idle connections in the redisPool.
@@ -262,24 +258,13 @@ func cleanupHook(pool *redis.Pool) {
 }
 
 //noinspection GoUnusedExportedFunction
-func SetupDatabase(redisURL string) {
-	gRedisPool = newPool(redisURL)
-	cleanupHook(gRedisPool)
-}
-
-//noinspection GoUnusedExportedFunction
-func GetDatabase() RedisDatabase {
-	return RedisDatabase{redisPool: gRedisPool}
-}
-
-//noinspection GoUnusedExportedFunction
-func NewDatabase(redisURL string) *redis.Pool {
+func SetupDatabase(redisURL string) *redis.Pool {
 	pool := newPool(redisURL)
 	cleanupHook(pool)
 	return pool
 }
 
 //noinspection GoUnusedExportedFunction
-func GetRedisDB(pool *redis.Pool) RedisDatabase {
+func GetDatabase(pool *redis.Pool) RedisDatabase {
 	return RedisDatabase{redisPool: pool}
 }
