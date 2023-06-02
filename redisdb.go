@@ -41,7 +41,12 @@ type RedisDatabase struct {
 func (d *RedisDatabase) Ping() error {
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed to close 'PING' db: %v", err)
+		}
+	}(conn)
 
 	_, err := redis.String(conn.Do("PING"))
 	if err != nil {
@@ -53,7 +58,12 @@ func (d *RedisDatabase) Ping() error {
 func (d *RedisDatabase) Get(key string) ([]byte, error) {
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed to close getting key %s: %v", key, err)
+		}
+	}(conn)
 
 	var data []byte
 	data, err := redis.Bytes(conn.Do("GET", key))
@@ -66,7 +76,12 @@ func (d *RedisDatabase) Get(key string) ([]byte, error) {
 func (d *RedisDatabase) Set(key string, value []byte) error {
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed to close setting key %s: %v", key, err)
+		}
+	}(conn)
 
 	_, err := conn.Do("SET", key, value)
 	if err != nil {
@@ -82,7 +97,12 @@ func (d *RedisDatabase) Set(key string, value []byte) error {
 func (d *RedisDatabase) Exists(key string) (bool, error) {
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed closing if key %s exists: %v", key, err)
+		}
+	}(conn)
 
 	ok, err := redis.Bool(conn.Do("EXISTS", key))
 	if err != nil {
@@ -94,7 +114,12 @@ func (d *RedisDatabase) Exists(key string) (bool, error) {
 func (d *RedisDatabase) Delete(key string) error {
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed to close key %s", key)
+		}
+	}(conn)
 
 	_, err := conn.Do("DEL", key)
 	return err
@@ -103,7 +128,12 @@ func (d *RedisDatabase) Delete(key string) error {
 func (d *RedisDatabase) GetKeys(pattern string) ([]string, error) {
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed to close retrieving '%s' keys", pattern)
+		}
+	}(conn)
 
 	iter := 0
 	var keys []string
@@ -160,7 +190,12 @@ func (d *RedisDatabase) HMGet(key string, fields ...string) (map[string]string, 
 	}
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+
+		}
+	}(conn)
 
 	values, err := redis.Strings(conn.Do("HMGET", redis.Args{key}.AddFlat(fields)...))
 	return d.spliceMap(fields, values, err)
@@ -168,7 +203,12 @@ func (d *RedisDatabase) HMGet(key string, fields ...string) (map[string]string, 
 
 func (d *RedisDatabase) HMGetKeys(key string) []string {
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed to close HMGetKeys %s", key)
+		}
+	}(conn)
 
 	values, _ := redis.Strings(conn.Do("HKEYS", key))
 	return values
@@ -176,7 +216,12 @@ func (d *RedisDatabase) HMGetKeys(key string) []string {
 
 func (d *RedisDatabase) HMGetAll(key string) map[string]string {
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed to close HMGetAll %s, %v", key, err)
+		}
+	}(conn)
 
 	values, _ := redis.StringMap(conn.Do("HGETALL", key))
 	return values
@@ -184,7 +229,12 @@ func (d *RedisDatabase) HMGetAll(key string) map[string]string {
 
 func (d *RedisDatabase) HMSet(key string, hashKey string, value []byte) error {
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed closing setting key %s:%s: %v", key, hashKey, err)
+		}
+	}(conn)
 
 	_, err := conn.Do("HMSET", key, hashKey, value)
 	if err != nil {
@@ -199,7 +249,12 @@ func (d *RedisDatabase) HMSet(key string, hashKey string, value []byte) error {
 
 func (d *RedisDatabase) HExists(key string, hashKey string) (bool, error) {
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed closing checking if key %s, %s  exists: %v", key, hashKey, err)
+		}
+	}(conn)
 
 	ok, err := redis.Bool(conn.Do("HEXISTS", key, hashKey))
 	if err != nil {
@@ -210,7 +265,12 @@ func (d *RedisDatabase) HExists(key string, hashKey string) (bool, error) {
 
 func (d *RedisDatabase) HDelete(key string, hashKey string) (int, error) {
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed closing checking if key %s, %s  exists: %v", key, hashKey, err)
+		}
+	}(conn)
 
 	number, err := redis.Int(conn.Do("HDEL", key, hashKey))
 	if err != nil {
@@ -222,7 +282,12 @@ func (d *RedisDatabase) HDelete(key string, hashKey string) (int, error) {
 func (d *RedisDatabase) Incr(counterKey string) (int, error) {
 
 	conn := d.redisPool.Get()
-	defer conn.Close()
+	defer func(conn redis.Conn) {
+		err := conn.Close()
+		if err != nil {
+			fmt.Printf("failed closing Incr")
+		}
+	}(conn)
 
 	return redis.Int(conn.Do("INCR", counterKey))
 }
@@ -257,14 +322,14 @@ func cleanupHook(pool *redis.Pool) {
 	}()
 }
 
-//noinspection GoUnusedExportedFunction
+// noinspection GoUnusedExportedFunction
 func SetupDatabase(redisURL string) *redis.Pool {
 	pool := newPool(redisURL)
 	cleanupHook(pool)
 	return pool
 }
 
-//noinspection GoUnusedExportedFunction
+// noinspection GoUnusedExportedFunction
 func GetDatabase(pool *redis.Pool) RedisDatabase {
 	return RedisDatabase{redisPool: pool}
 }
