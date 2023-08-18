@@ -1,4 +1,4 @@
-module redis.2829applegate.com
+module github.com/henryse/go-redisdb
 
 go 1.20
 
